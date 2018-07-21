@@ -15,5 +15,8 @@ moveSnake seconds game = game { snakeLoc = (x', y') }
     (vx, vy) = snakeVel game
 
     -- New locations.
-    x' = x + vx * seconds
-    y' = y --  + vy * seconds
+    (x',y') = case moveDir game of
+      W -> (x, y+vy*seconds)
+      S -> (x, y-vy*seconds)
+      A -> (x-vx*seconds, y)
+      D -> (x+vx*seconds, y)
