@@ -4,11 +4,16 @@ import Graphics.Gloss
 data Direction = W | S | A | D
  deriving (Eq, Show)
 
+data Pause = Yes | No
+ deriving (Eq, Show)
+
 data GameState = Game
-  { snakeLoc :: [(Float, Float)]  -- ^ Pong snake (x, y) location.
-  , snakeVel :: (Float, Float)  -- ^ Pong snake (x, y) velocity. 
+  { snakeLoc :: [(Float, Float)]  -- ^  snake (x, y) location.
+  , snakeVel :: (Float, Float)  -- ^  snake (x, y) velocity. 
   , snakeDir :: Direction
   , snakeRan :: Int
+  , foodLoc :: (Float, Float) -- Location of the food
+  , isPaused :: Pause
   } deriving Show 
 
 
@@ -16,10 +21,12 @@ data GameState = Game
 -- | The starting state for the game of Pong.
 initialState :: GameState
 initialState = Game
-  { snakeLoc = (0,0) : (10,0) :(20,0):(30,0):(40,0):(50,0) : []
+  { snakeLoc = (0,0):(1,0) :(2,0):(3,0):(4,0):(5,0) : []
   , snakeVel = (50, 50)
   , snakeDir = D
   , snakeRan = 1
+  , foodLoc = (50,50)
+  , isPaused = No
   }
 
 

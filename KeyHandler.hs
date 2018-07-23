@@ -17,4 +17,7 @@ handleKeys (EventKey (Char 'a') _ _ _) game = game { snakeDir = x }
 handleKeys (EventKey (Char 'd') _ _ _) game = game { snakeDir = x }
   where
     x = if snakeDir game /= A then D else snakeDir game
+handleKeys (EventKey (Char 'p') _ _ _) game = game { isPaused = x }
+ where
+ 	x = if isPaused game == Yes then No else Yes
 handleKeys _ game = game

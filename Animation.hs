@@ -1,7 +1,7 @@
 module Animation where
 
 import Game
-
+import System.Random
 -- | Update the snake position using its current velocity.
 movesnake :: Float    -- ^ The number of seconds since last update
          -> GameState -- ^ The initial game state
@@ -32,16 +32,8 @@ moveFun ((x,y):xs) dir seconds vx = case dir of
 followFun :: (Float,Float) -> [(Float,Float)] -> [(Float,Float)]
 followFun _ [] = []
 followFun leader (follow:xs) = leader : followFun follow xs
-{-}
-moveFun :: [(Float,Float)] -> Direction -> Float -> Float -> [(Float,Float)]
-moveFun [] _ _ _= []
-moveFun ((x,y):xs) dir seconds vx = case dir of
-      W -> (x, y+vx*seconds) : moveFun xs dir seconds vx
-      S -> (x, y-vx*seconds) : moveFun xs dir seconds vx
-      A -> (x-vx*seconds, y) : moveFun xs dir seconds vx
-      D -> (x+vx*seconds, y) : moveFun xs dir seconds vx
 
--}
+
 
 type Radius = Float 
 type Position = (Float, Float)
@@ -59,25 +51,33 @@ wallCollision (x , y) radius = (s_wall1Col || s_wall2Col , topCollision || botto
 
 wallBounce :: GameState -> GameState
 wallBounce game = game { snakeLoc = checkCollision (snakeLoc game) }
- {-} where
-    -- Radius. Use the same thing as in `render`.
-    radius = 10
 
-    -- The old velocities.
+posCheck :: GameState -> GameState
+posCheck game = checkPosition (snakeLoc game) game 
 
-    (vx, vy) = snakeLoc game
 
-    (vx',vy') = if (wallCollision (snakeLoc game) radius) == (False, True)
-          then
-             (vx,-vy)
-           else if (wallCollision (snakeLoc game) radius) == (True, False)
-            then
-               (-vx,vy)
-             else if (wallCollision (snakeLoc game) radius) == (True, True)
-               then
-                 (-vx,-vy)
-                else
-                 (vx,vy)-}
+checkPosition :: [(Float,Float)] -> GameState -> GameState
+checkPosition [] game = game
+checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, snakeRan = newSeed }
+ where
+  cond = isFood game (head snake) 4
+  cond2 = isSnake (tail snake) (head snake) 
+  (x,y) = head snake 
+
+  newSnake = if cond
+   then snakeLoc game ++ [(x,y)] ++ [(x,y)] ++ [(x,y)]++ [(x,y)]++ [(x,y)]++ [(x,y)]
+     else if cond2
+      then (0,0):(1,0) :(2,0):(3,0):(4,0):(5,0) : []
+        else snakeLoc game
+
+  b = drop (snakeRan game) (randomRs((-140),140) (mkStdGen 42) :: [Float])
+  newSeed = snakeRan game + 1
+  f_pos = take 2 b
+
+  newFoodLoc = if cond then list2tup f_pos else foodLoc game
+        
+        
+
 
 checkCollision :: [(Float,Float)] -> [(Float,Float)]
 checkCollision [] = []
@@ -92,4 +92,34 @@ checkCollision ((x,y):xs) =
 
 -- | Update the game by moving the snake and bouncing off walls.
 update :: Float -> GameState -> GameState
-update  seconds = wallBounce . movesnake seconds
+update seconds game = if isPaused game == Yes then game else posCheck(wallBounce(movesnake seconds game))
+
+
+
+isFood :: GameState -> Position -> Radius-> Bool
+isFood game (x,y) rad = (inXrange && inYrange)
+  where
+    (a,b) = foodLoc game
+    temp = (a - x)
+    temp2 = (b - y)
+    disX = 
+      if temp < 0 then (-temp) else temp
+    disY = 
+      if temp2 < 0 then (-temp2) else temp2
+
+    inXrange = disX <= rad
+    inYrange = disY <= rad
+
+
+
+
+
+
+
+isSnake :: [Position] -> Position -> Bool
+isSnake [] pos = False
+isSnake (x:xs) pos = if (pos == x) then True else isSnake xs pos
+
+list2tup :: [Float] -> (Float,Float)
+list2tup [] = (0,0)
+list2tup list = (head list, last list)
