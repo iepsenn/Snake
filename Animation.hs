@@ -2,25 +2,21 @@ module Animation where
 
 import Game
 import System.Random
+
+
+type Radius = Float 
+type Position = (Float, Float)
+
+
+
 -- | Update the snake position using its current velocity.
 movesnake :: Float    -- ^ The number of seconds since last update
          -> GameState -- ^ The initial game state
          -> GameState -- ^ A new game state with an updated snake position
 movesnake seconds game = game { snakeLoc = moveFun (snakeLoc game) (snakeDir game) (seconds) (50)}
-    -- Old locations and velocities.
-    --(x, y) = snakeLoc game
-    --(vx, vy) = snakeVel game
-{-
-    -- New locations.{-}
-    (x',y') = case snakeDir game of
-      W -> (x, y+vy*seconds)
-      S -> (x, y-vy*seconds)
-      A -> (x-vx*seconds, y)
-      D -> (x+vx*seconds, y)
-    --x' = x + vx * seconds
-    --y' = y + vy * seconds-}
-   -}
 
+
+-- | Moves the snake around according to direction
 moveFun :: [(Float,Float)] -> Direction -> Float -> Float -> [(Float,Float)]
 moveFun [] _ _ _= []
 moveFun ((x,y):xs) dir seconds vx = case dir of
@@ -29,33 +25,18 @@ moveFun ((x,y):xs) dir seconds vx = case dir of
       A -> (x-vx*seconds, y) : followFun (x,y) xs 
       D -> (x+vx*seconds, y) : followFun (x,y) xs 
 
+-- | sub func makes tail follow head of snake
 followFun :: (Float,Float) -> [(Float,Float)] -> [(Float,Float)]
 followFun _ [] = []
 followFun leader (follow:xs) = leader : followFun follow xs
 
 
 
-type Radius = Float 
-type Position = (Float, Float)
-
-
-
-wallCollision :: Position -> Radius -> (Bool,Bool) 
-wallCollision (x , y) radius = (s_wall1Col || s_wall2Col , topCollision || bottomCollision)
-  where
-    topCollision    = y - radius <= -fromIntegral width / 2 
-    bottomCollision = y + radius >=  fromIntegral width / 2
-    s_wall1Col = x - radius <= -fromIntegral height / 2
-    s_wall2Col = x + radius >= fromIntegral height / 2
-
-
-wallBounce :: GameState -> GameState
-wallBounce game = game { snakeLoc = checkCollision (snakeLoc game) }
-
 posCheck :: GameState -> GameState
 posCheck game = checkPosition (snakeLoc game) game 
 
 
+-- | Checks Position for Snake or Food
 checkPosition :: [(Float,Float)] -> GameState -> GameState
 checkPosition [] game = game
 checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, snakeRan = newSeed }
@@ -77,6 +58,17 @@ checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, sna
   newFoodLoc = if cond then list2tup f_pos else foodLoc game
         
         
+wallBounce :: GameState -> GameState
+wallBounce game = game { snakeLoc = checkCollision (snakeLoc game) }
+
+
+wallCollision :: Position -> Radius -> (Bool,Bool) 
+wallCollision (x , y) radius = (s_wall1Col || s_wall2Col , topCollision || bottomCollision)
+  where
+    topCollision    = y - radius <= -fromIntegral width / 2 
+    bottomCollision = y + radius >=  fromIntegral width / 2
+    s_wall1Col = x - radius <= -fromIntegral height / 2
+    s_wall2Col = x + radius >= fromIntegral height / 2
 
 
 checkCollision :: [(Float,Float)] -> [(Float,Float)]
@@ -89,10 +81,6 @@ checkCollision ((x,y):xs) =
        then (-x,y) : checkCollision xs
         else
           (x,y) : checkCollision xs
-
--- | Update the game by moving the snake and bouncing off walls.
-update :: Float -> GameState -> GameState
-update seconds game = if isPaused game == Yes then game else posCheck(wallBounce(movesnake seconds game))
 
 
 
@@ -110,12 +98,6 @@ isFood game (x,y) rad = (inXrange && inYrange)
     inXrange = disX <= rad
     inYrange = disY <= rad
 
-
-
-
-
-
-
 isSnake :: [Position] -> Position -> Bool
 isSnake [] pos = False
 isSnake (x:xs) pos = if (pos == x) then True else isSnake xs pos
@@ -123,3 +105,9 @@ isSnake (x:xs) pos = if (pos == x) then True else isSnake xs pos
 list2tup :: [Float] -> (Float,Float)
 list2tup [] = (0,0)
 list2tup list = (head list, last list)
+
+
+
+-- | Update the game by moving the snake and bouncing off walls.
+update :: Float -> GameState -> GameState
+update seconds game = if isPaused game == Yes then game else posCheck(wallBounce(movesnake seconds game))

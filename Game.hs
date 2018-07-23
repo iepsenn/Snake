@@ -18,7 +18,7 @@ data GameState = Game
 
 
 
--- | The starting state for the game of Pong.
+-- | The starting state for the game of Snake.
 initialState :: GameState
 initialState = Game
   { snakeLoc = (0,0):(1,0) :(2,0):(3,0):(4,0):(5,0) : []
@@ -31,7 +31,7 @@ initialState = Game
 
 
 window :: Display
-window = InWindow "myexample" (width, height) (offset, offset)
+window = InWindow "Snake comes alive!" (width, height) (offset, offset)
 
 background :: Color
 background = black

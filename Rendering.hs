@@ -3,6 +3,9 @@ module Rendering where
 import Game
 import Graphics.Gloss
 import System.Random
+
+
+
 -- | Convert a game state into a picture.
 render :: GameState  -- ^ The game state to render.
        -> Picture   -- ^ A picture of this game state.
@@ -12,15 +15,13 @@ render game =
     --  The snake.
     drawSnake :: [(Float,Float)] -> [Picture]
     drawSnake [] = []
-    drawSnake ((x,y):xs) = (translate x y $ color snakeColor $ rectangleSolid 10 10) : drawSnake xs
+    drawSnake ((x,y):xs) = (translate x y $ color snakeColor $ rectangleSolid 8 8) : drawSnake xs
     snakeColor = dark red
 
     -- The food
-    b = drop (snakeRan game) (randomRs((-150),150) (mkStdGen 42) :: [Float])
-    f_pos = take 2 b
+    
 
-
-    food = translate (head f_pos) (last f_pos) $ color foodColor $ circleSolid 3
+    food = uncurry translate (foodLoc game) $ color foodColor $ circleSolid 4
     foodColor = green
 
     --  The bottom and top walls.
