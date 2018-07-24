@@ -39,7 +39,7 @@ posCheck game = checkPosition (snakeLoc game) game
 -- | Checks Position for Snake or Food
 checkPosition :: [(Float,Float)] -> GameState -> GameState
 checkPosition [] game = game
-checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, snakeRan = newSeed }
+checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, snakeRan = newSeed, score = newScore }
  where
   cond = isFood game (head snake) 4
   cond2 = isSnake (tail snake) (head snake) 
@@ -56,6 +56,12 @@ checkPosition snake game = game { snakeLoc = newSnake, foodLoc = newFoodLoc, sna
   f_pos = take 2 b
 
   newFoodLoc = if cond then list2tup f_pos else foodLoc game
+
+  newScore =
+    if cond 
+      then score game + 1
+       else if cond2 then 0
+        else score game
         
         
 wallBounce :: GameState -> GameState
@@ -98,6 +104,7 @@ isFood game (x,y) rad = (inXrange && inYrange)
     inXrange = disX <= rad
     inYrange = disY <= rad
 
+
 isSnake :: [Position] -> Position -> Bool
 isSnake [] pos = False
 isSnake (x:xs) pos = if (pos == x) then True else isSnake xs pos
@@ -110,4 +117,6 @@ list2tup list = (head list, last list)
 
 -- | Update the game by moving the snake and bouncing off walls.
 update :: Float -> GameState -> GameState
-update seconds game = if isPaused game == Yes then game else posCheck(wallBounce(movesnake seconds game))
+update seconds game
+      | isPaused game == Yes = game 
+      | otherwise = posCheck(wallBounce(movesnake seconds game))

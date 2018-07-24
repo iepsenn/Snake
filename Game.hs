@@ -14,6 +14,7 @@ data GameState = Game
   , snakeRan :: Int
   , foodLoc :: (Float, Float) -- Location of the food
   , isPaused :: Pause
+  , score :: Int
   } deriving Show 
 
 
@@ -27,9 +28,10 @@ initialState = Game
   , snakeRan = 1
   , foodLoc = (50,50)
   , isPaused = No
+  , score = 0
   }
 
-
+  
 window :: Display
 window = InWindow "Snake comes alive!" (width, height) (offset, offset)
 
@@ -45,3 +47,4 @@ width, height, offset :: Int
 width = 300
 height = 300
 offset = 100
+

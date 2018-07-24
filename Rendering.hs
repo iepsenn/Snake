@@ -10,13 +10,15 @@ import System.Random
 render :: GameState  -- ^ The game state to render.
        -> Picture   -- ^ A picture of this game state.
 render game =
-  pictures ([walls,food] ++ (drawSnake (snakeLoc game)))
+  pictures ([walls,food,s_score] ++ (drawSnake (snakeLoc game)))
   where
     --  The snake.
     drawSnake :: [(Float,Float)] -> [Picture]
     drawSnake [] = []
     drawSnake ((x,y):xs) = (translate x y $ color snakeColor $ rectangleSolid 8 8) : drawSnake xs
     snakeColor = dark red
+
+    s_score = translate (-130) (130) $ scale (0.1) (0.1) $ color white $ text (show (score game))
 
     -- The food
     
@@ -39,3 +41,5 @@ render game =
 
     wallColor = greyN 0.5
     walls = pictures [wall 150, wall (-150), s_wall 150, s_wall (-150)]
+
+    
